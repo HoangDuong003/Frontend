@@ -17,6 +17,7 @@ import Sidebar from './components/layout/Sidebar';
 import Profile from './pages/employee/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminScheduleTable from './features/calendar/AdminScheduleTable';
+import Register from './pages/auth/Register';
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -84,7 +85,7 @@ const App = () => {
             <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="/login" element={<Login />} />
-
+          <Route path="/register" element={<Register />} />
         </Routes>
       </div>
     </div>

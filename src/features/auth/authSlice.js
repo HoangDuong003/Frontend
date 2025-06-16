@@ -1,61 +1,64 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { mockUsers } from '../../data/mockData';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authAPI } from '../../api/api';
+
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.login(credentials);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
+  }
+);
 
 const initialState = {
   isAuthenticated: false,
   user: null,
   token: null,
-  error: null
+  error: null,
+  loading: false
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    login: (state, action) => {
-      const { username, password } = action.payload;
-      let user = mockUsers.find(
-        u => (u.username === username || u.email === username) && u.password === password
-      );
-
-      // Nếu không tìm thấy trong mockUsers, tìm trong localStorage 'employees'
-      if (!user) {
-        const data = localStorage.getItem('employees');
-        if (data) {
-          const employees = JSON.parse(data);
-          user = employees.find(
-            e => (e.username === username || e.email === username) && e.password === password
-          );
-        }
-      }
-
-      if (user) {
-        state.isAuthenticated = true;
-        state.user = {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role || 'user',
-          name: user.name
-        };
-        state.token = 'mock-jwt-token';
-        state.error = null;
-      } else {
-        state.error = 'Invalid username/email or password';
-      }
-    },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
       state.error = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
     },
     clearError: (state) => {
       state.error = null;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.error = null;
+        localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('currentUser', JSON.stringify(action.payload.user));
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   }
 });
 
-export const { login, logout, clearError } = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 
 export default authSlice.reducer; 

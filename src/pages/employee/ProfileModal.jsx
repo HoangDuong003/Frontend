@@ -23,12 +23,17 @@ const ProfileModal = ({ open, onClose }) => {
             if (data) {
                 const employees = JSON.parse(data);
                 const emp = employees.find(e => e.id === user.id);
-                setEmployee(emp || user);
+                if (JSON.stringify(employee) !== JSON.stringify(emp || user)) {
+                    setEmployee(emp || user);
+                }
             } else {
-                setEmployee(user);
+                if (JSON.stringify(employee) !== JSON.stringify(user)) {
+                    setEmployee(user);
+                }
             }
         }
-    }, [user, open]);
+        // eslint-disable-next-line
+    }, [user]);
 
     const handleSave = () => {
         if (!editEmployee.name || !editEmployee.phone || !editEmployee.gender || !editEmployee.address) {

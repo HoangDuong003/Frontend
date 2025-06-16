@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Tạo instance axios với base URL
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
+    baseURL: 'http://localhost:8080',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -35,6 +35,10 @@ export const productAPI = {
     createProduct: (data) => api.post('/products', data),
     updateProduct: (id, data) => api.put(`/products/${id}`, data),
     deleteProduct: (id) => api.delete(`/products/${id}`),
+};
+
+export const adminAPI = {
+    getEmployees: () => api.get('/admin/employees'),
 };
 
 export default api; 

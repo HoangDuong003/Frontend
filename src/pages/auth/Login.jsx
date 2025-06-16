@@ -10,35 +10,35 @@ import {
   Typography,
   Box,
   Alert,
+  CircularProgress,
 } from '@mui/material';
-import { login, clearError } from '../../features/auth/authSlice';
+import { loginUser, clearError } from '../../features/auth/authSlice';
 import logo from '../../assets/images/urban-logo.png';
 
 const validationSchema = Yup.object({
-  username: Yup.string().required('Username or Email is required'),
+  email: Yup.string().email('Invalid email format').required('Email is required'),
   password: Yup.string().required('Password is required'),
 });
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { error, isAuthenticated, user } = useSelector((state) => state.auth);
+  const { error, isAuthenticated, user, loading } = useSelector((state) => state.auth);
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      localStorage.setItem('currentUser', JSON.stringify(user));
       navigate('/home');
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const formik = useFormik({
     initialValues: {
-      username: '',
+      email: '',
       password: '',
     },
     validationSchema,
     onSubmit: (values) => {
-      dispatch(login(values));
+      dispatch(loginUser(values));
     },
   });
 
@@ -82,13 +82,13 @@ const Login = () => {
         <form onSubmit={formik.handleSubmit}>
           <TextField
             fullWidth
-            id="username"
-            name="username"
-            label="Username or Email"
-            value={formik.values.username}
+            id="email"
+            name="email"
+            label="Email"
+            value={formik.values.email}
             onChange={formik.handleChange}
-            error={formik.touched.username && Boolean(formik.errors.username)}
-            helperText={formik.touched.username && formik.errors.username}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
             margin="normal"
           />
 
@@ -111,12 +111,11 @@ const Login = () => {
             fullWidth
             type="submit"
             sx={{ mt: 3 }}
+            disabled={loading}
           >
-            Login
+            {loading ? <CircularProgress size={24} /> : 'Login'}
           </Button>
         </form>
-
-
       </Paper>
     </Box>
   );
